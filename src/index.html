@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <link rel="stylesheet" href="./styles/app.min.css" />
+  </head>
+
+  <body>
+    <main id="root">
+      <section id="sudoku" class="loading ready">
+        <div class="inner">
+          <div class="loading-container">
+            <p>Loading</p>
+          </div>
+
+          <div class="sudoku-container">
+            <div class="sudoku-header">
+              <h1>Sudoku</h1>
+              <p class="sudoku-difficulty-title"></p>
+              <div class="sudoku-timer"><p>0:0</p></div>
+            </div>
+
+            <div class="sudoku-grid"></div>
+
+            <div class="sudoku-controls">
+              <div class="sudoku-values"></div>
+
+              <div class="sudoku-difficulty">
+                <p>Difficulty</p>
+                <input type="range" min="1" max="80" value="40" class="slider" id="difficulty" oninput="handleSudokuDifficultyChange(event)" />
+              </div>
+
+              <div class="sudoku-controls-buttons">
+                <button class="sudoku-controls-button start" onclick="startSudoku()">Start</button>
+                <button class="sudoku-controls-button" onclick="newSudoku()">New Game</button>
+                <button class="sudoku-controls-button" onclick="restartSudoku()">Restart Game</button>
+                <button class="sudoku-controls-button" onclick="validateSudoku()">Check</button>
+                <button class="sudoku-controls-button" onclick="solveSudoku()">Solve</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <script src="./scripts/app.min.js"></script>
+      </section>
+    </main>
+  </body>
+</html>

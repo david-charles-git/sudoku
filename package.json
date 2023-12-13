@@ -1,0 +1,20 @@
+{
+  "name": "sudoku",
+  "version": "1.0.0",
+  "description": "Sudoku",
+  "main": "./dist/app.js",
+  "scripts": {
+    "run": "yarn build && open ./dist/index.html",
+    "build": "bash bash/build.sh",
+    "docker-build": "docker build -t sudoku .",
+    "docker-run": "docker run -p 8080:80 sudoku"
+  },
+  "author": "David Charles",
+  "license": "MIT",
+  "devDependencies": {
+    "sass": "^1.69.5",
+    "typescript": "^5.1.6",
+    "uglify-js": "^3.17.4",
+    "uglifycss": "^0.0.29"
+  }
+}
