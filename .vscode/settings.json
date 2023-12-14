@@ -1,9 +1,10 @@
 {
   "files.exclude": {
-    "node_modules": true,
     "dist": true,
+    "node_modules": true
   },
   "cSpell.words": [
+    "SASS",
     "subgrid"
   ]
 }

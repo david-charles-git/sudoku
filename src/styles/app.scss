@@ -1,5 +1,5 @@
-@use 'lib/mixins' as mixins;
-@use 'lib/variables' as variables;
+@use 'library/mixins' as mixins;
+@use 'library/variables' as variables;
 
 * {
   margin: 0 auto;
@@ -14,7 +14,14 @@
 
   &.error {
     > .inner {
-      background-color: #ff000099;
+      .error-container {
+        @include mixins.grid;
+
+        .background {
+          opacity: 0.5;
+          background-color: variables.$color-error;
+        }
+      }
     }
   }
 
@@ -79,9 +86,21 @@
     }
   }
 
+  &.complete {
+    > .inner {
+      .completion-container {
+        @include mixins.grid;
+
+        .background {
+          opacity: 0.5;
+          background-color: variables.$color-success;
+        }
+      }
+    }
+  }
+
   > .inner {
     @include mixins.grid;
-    transition: background-color 1s ease-in-out;
     grid-gap: variables.$big-grid-gap;
     grid-template-columns: 1fr;
     grid-template-rows: auto auto;
@@ -95,12 +114,26 @@
     overflow: hidden;
     min-height: 80%;
 
+    .error-container,
+    .completion-container {
+      @include mixins.background;
+      display: none;
+
+      .background {
+        @include mixins.background;
+        transition: background-color 1s ease-in-out;
+        background-color: variables.$color-primary;
+      }
+    }
+
     .loading-container {
       display: none;
     }
 
     .sudoku-container {
       @include mixins.grid;
+      position: relative;
+      z-index: 2;
 
       .sudoku-header {
         @include mixins.grid;

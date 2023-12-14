@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+  <title>Sudoku</title>
+  <url>https://www.[*EXAMPLE*].com</url>
+  
+  <pages>
+    <page>
+      <title>Sudoku</title>
+      <url>/</url>
+    </page>
+  </pages>
+</site>

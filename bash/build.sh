@@ -1,52 +1,33 @@
 build() {
   echo "Building project..."
-  handle_dist_dir_reset
-  handle_html
-  handle_misc
-  handle_ts
-  handle_sass
+  handle_dist_reset
+  handle_webapp_migration_to_dist
+  handle_ts_compilation_minification_migration_to_dist
+  handle_sass_compilation_minification_migration_to_dist
   echo "Finished building project"
 }
 
-handle_dist_dir_reset() {
+handle_dist_reset() {
   dist_dir="dist"
   if [ -d "$dist_dir" ]; then
     rm -r "$dist_dir"
   fi
   mkdir "$dist_dir"
-  echo "Created new dist directory: $dist_dir"
+  echo "Dist directory reset"
 }
-handle_html() {
-  html_source_dir="src"
-  html_dist_dir="dist"
-  for html_file in "$html_source_dir"/*.html; do
-    if [ -f "$html_file" ]; then
-      file_name=$(basename "$html_file")
-      cp "$html_file" "$html_dist_dir/$file_name"
-    fi
-  done
-  echo "Copied HTML files to dist directory"
-}
-handle_misc() {
+handle_webapp_migration_to_dist() {
   misc_source_dir="src"
   misc_dist_dir="dist"
-  for misc_file in "$misc_source_dir"/*ico; do
-    if [ -f "$misc_file" ]; then
-      file_name=$(basename "$misc_file")
-      cp "$misc_file" "$misc_dist_dir/$file_name"
-    fi
-  done
-  for misc_file in "$misc_source_dir"/*png; do
-    if [ -f "$misc_file" ]; then
-      file_name=$(basename "$misc_file")
-      cp "$misc_file" "$misc_dist_dir/$file_name"
-    fi
-  done
-  echo "Copied misc files to dist directory"
+  cp -r "$misc_source_dir/assets" "$misc_dist_dir/assets"
+  cp "$misc_source_dir/favicon.ico" "$misc_dist_dir/favicon.ico"
+  cp "$misc_source_dir/robots.txt" "$misc_dist_dir/robots.txt"
+  cp "$misc_source_dir/sitemap.xml" "$misc_dist_dir/sitemap.xml"
+  cp "$misc_source_dir/index.html" "$misc_dist_dir/index.html"
+  echo "Webapp app files migrated from src to dist"
 }
-handle_ts() {
+handle_ts_compilation_minification_migration_to_dist() {
   tsc
-  js_source_dir="dist/scripts"
+  js_source_dir="dist/js"
   for js_file in "$js_source_dir"/*.js; do
     if [ -f "$js_file" ]; then
       file_name="${js_file##*/}"
@@ -57,9 +38,9 @@ handle_ts() {
   done
   echo "Compiled TypeScript to JavaScript and minified"
 }
-handle_sass() {
+handle_sass_compilation_minification_migration_to_dist() {
   scss_source_dir="src/styles"
-  css_source_dir="dist/styles"
+  css_source_dir="dist/css"
   for scss_file in "$scss_source_dir"/*.scss; do
     if [ -f "$scss_file" ]; then
       file_name=$(basename "$scss_file" .scss)

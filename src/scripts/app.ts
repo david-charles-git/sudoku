@@ -346,6 +346,8 @@ const initialiseSudokuVariables: () => void = () => {
 
 const newSudoku: () => void = () => {
   const sudokuContainer: HTMLElement = document.getElementById(sudokuContainerID) as HTMLElement;
+  sudokuContainer.classList.remove('complete');
+  sudokuContainer.classList.remove('error');
   sudokuContainer.classList.add('ready');
   stopSudokuTimer();
 };
@@ -400,6 +402,9 @@ const populateSudokuDifficulty: () => void = () => {
 };
 
 const restartSudoku: () => void = () => {
+  const sudokuContainer: HTMLElement = document.getElementById(sudokuContainerID) as HTMLElement;
+  sudokuContainer.classList.remove('error');
+  sudokuContainer.classList.remove('complete');
   populateSudokuGrid(sudokuPuzzle);
   stopSudokuTimer();
   startSudokuTimer();
@@ -438,7 +443,8 @@ const setSudokuUserValue: (event: Event) => void = (event) => {
 
 const showCompleteState: () => void = () => {
   const sudokuContainer: HTMLElement = document.getElementById(sudokuContainerID) as HTMLElement;
-  sudokuContainer.classList.add('ready');
+  sudokuContainer.classList.remove('error');
+  sudokuContainer.classList.add('complete');
 };
 
 const showErrorState: () => void = () => {
@@ -456,6 +462,7 @@ const solveSudoku: () => void = () => {
 
 const startSudoku: () => void = () => {
   const sudokuContainer: HTMLElement = document.getElementById(sudokuContainerID) as HTMLElement;
+  sudokuContainer.classList.remove('error');
   sudokuContainer.classList.remove('ready');
   setNewSudokuGrid();
   startSudokuTimer();
