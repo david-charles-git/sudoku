@@ -1,23 +1,23 @@
-var seed: number = 0;
+var sudokuActiveUserValue: number = 0;
+var sudokuShowErrors: boolean = true;
 var sudokuContainerID: string = '';
+var sudokuTimerOn: boolean = false;
 var sudokuDifficulty: number = 0;
-var sudokuGrid: Grid = [];
+var sudokuInterval: any = null;
 var sudokuPuzzle: Grid = [];
-var activeUserValue: number = 0;
-var showErrors: boolean = true;
-var timerOn: boolean = false;
-var interval: any = null;
+var sudokuSeed: number = 0;
+var sudokuGrid: Grid = [];
 
 /* --- utilities --- */
 const fillSudoku: (grid: Grid) => boolean = (grid) => {
-  const emptyCell: GroupIndex | null = findEmptyCell(grid);
+  const emptyCell: GroupIndex | null = findSudokuEmptyCell(grid);
   if (!emptyCell) {
     return true;
   }
   const [row, col]: GroupIndex = emptyCell;
-  const numbers: number[] = shuffleArray([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+  const numbers: number[] = shuffleSudokuGrid([1, 2, 3, 4, 5, 6, 7, 8, 9]);
   for (const num of numbers) {
-    if (isValidPlacement(grid, row, col, num)) {
+    if (isValidSudokuPlacement(grid, row, col, num)) {
       grid[row][col] = num;
       if (fillSudoku(grid)) {
         return true;
@@ -28,7 +28,7 @@ const fillSudoku: (grid: Grid) => boolean = (grid) => {
   return false;
 };
 
-const findEmptyCell: (grid: Grid) => GroupIndex | null = (grid) => {
+const findSudokuEmptyCell: (grid: Grid) => GroupIndex | null = (grid) => {
   for (let row: number = 0; row < 9; row++) {
     for (let col: number = 0; col < 9; col++) {
       if (grid[row][col] === 0) {
@@ -45,16 +45,16 @@ const generateSudokuGrid: () => Grid = () => {
   return grid;
 };
 
-const generateSudokuPuzzle: (grid: Grid, seed: number, difficulty: number) => Grid = (grid, seed, difficulty) => {
+const generateSudokuPuzzle: (grid: Grid, sudokuSeed: number, difficulty: number) => Grid = (grid, sudokuSeed, difficulty) => {
   const puzzle: Grid = [];
   for (let i: number = 0; i < grid.length; i++) {
     puzzle[i] = grid[i].slice();
   }
-  removeRandomNumbers(puzzle, seed, difficulty);
+  removeRandomSudokuNumbers(puzzle, sudokuSeed, difficulty);
   return puzzle;
 };
 
-const getDifficultyAsText: (difficulty: number) => string = (difficulty) => {
+const getSudokuDifficultyAsText: (difficulty: number) => string = (difficulty) => {
   const difficultyAsPercentage: number = (100 / 80) * difficulty;
   var sudokuDifficultyHTML: string = '';
   if (difficultyAsPercentage < 25) {
@@ -69,7 +69,7 @@ const getDifficultyAsText: (difficulty: number) => string = (difficulty) => {
   return sudokuDifficultyHTML;
 };
 
-const getItemGroupIndexLimits: (itemIndex: GroupIndex) => [GroupIndex, GroupIndex] = (itemIndex) => {
+const getSudokuItemGroupIndexLimits: (itemIndex: GroupIndex) => [GroupIndex, GroupIndex] = (itemIndex) => {
   const rowLimit: GroupIndex = [0, 3];
   const columnLimit: GroupIndex = [0, 3];
   if (itemIndex[0] < 3) {
@@ -95,13 +95,13 @@ const getItemGroupIndexLimits: (itemIndex: GroupIndex) => [GroupIndex, GroupInde
   return [columnLimit, rowLimit];
 };
 
-const handleHighlightColumn: (sudokuID: string, columnIndex: number, enterExit: enterExit, currentValue: number, showErrors?: boolean) => void = (
-  sudokuID,
-  columnIndex,
-  enterExit,
-  currentValue,
-  showErrors = false
-) => {
+const handleHighlightSudokuColumn: (
+  sudokuID: string,
+  columnIndex: number,
+  enterExit: enterExit,
+  currentValue: number,
+  sudokuShowErrors?: boolean
+) => void = (sudokuID, columnIndex, enterExit, currentValue, sudokuShowErrors = false) => {
   const sudokuContainer: HTMLElement | null = document.getElementById(sudokuID);
   const itemRows: HTMLCollectionOf<Element> = sudokuContainer?.getElementsByClassName('sudoku-row') as HTMLCollectionOf<Element>;
   for (let i: number = 0; i < itemRows.length; i++) {
@@ -112,7 +112,7 @@ const handleHighlightColumn: (sudokuID: string, columnIndex: number, enterExit: 
     itemRowChild.classList.remove('error');
     if (enterExit === 'enter') {
       itemRowChild.classList.add('hover');
-      if (itemValue === currentValue && showErrors) {
+      if (itemValue === currentValue && sudokuShowErrors) {
         itemRowChild.classList.add('error');
       }
     } else {
@@ -121,16 +121,16 @@ const handleHighlightColumn: (sudokuID: string, columnIndex: number, enterExit: 
   }
 };
 
-const handleHighlightGroup: (sudokuID: string, itemIndex: GroupIndex, enterExit: enterExit, currentValue: number, showErrors?: boolean) => void = (
-  sudokuID,
-  itemIndex,
-  enterExit,
-  currentValue,
-  showErrors = false
-) => {
+const handleHighlightSudokuGroup: (
+  sudokuID: string,
+  itemIndex: GroupIndex,
+  enterExit: enterExit,
+  currentValue: number,
+  sudokuShowErrors?: boolean
+) => void = (sudokuID, itemIndex, enterExit, currentValue, sudokuShowErrors = false) => {
   const sudokuContainer: HTMLElement | null = document.getElementById(sudokuID);
   const itemRows: HTMLCollectionOf<Element> = sudokuContainer?.getElementsByClassName('sudoku-row') as HTMLCollectionOf<Element>;
-  const groupIndexLimits: [GroupIndex, GroupIndex] = getItemGroupIndexLimits(itemIndex);
+  const groupIndexLimits: [GroupIndex, GroupIndex] = getSudokuItemGroupIndexLimits(itemIndex);
   for (let i: number = 0; i < itemRows.length; i++) {
     const itemRowChildren: HTMLCollectionOf<Element> = itemRows[i].getElementsByClassName('sudoku-item');
     if (i > groupIndexLimits[1][0] && i < groupIndexLimits[1][1]) {
@@ -142,7 +142,7 @@ const handleHighlightGroup: (sudokuID: string, itemIndex: GroupIndex, enterExit:
           itemRowChild.classList.remove('error');
           if (enterExit === 'enter') {
             itemRowChild.classList.add('hover');
-            if (itemValue === currentValue && showErrors) {
+            if (itemValue === currentValue && sudokuShowErrors) {
               itemRowChild.classList.add('error');
             }
           } else {
@@ -154,13 +154,13 @@ const handleHighlightGroup: (sudokuID: string, itemIndex: GroupIndex, enterExit:
   }
 };
 
-const handleHighlightRow: (sudokuID: string, rowIndex: number, enterExit: enterExit, currentValue: number, showErrors?: boolean) => void = (
-  sudokuID,
-  rowIndex,
-  enterExit,
-  currentValue,
-  showErrors = false
-) => {
+const handleHighlightSudokuRow: (
+  sudokuID: string,
+  rowIndex: number,
+  enterExit: enterExit,
+  currentValue: number,
+  sudokuShowErrors?: boolean
+) => void = (sudokuID, rowIndex, enterExit, currentValue, sudokuShowErrors = false) => {
   const sudokuContainer: HTMLElement | null = document.getElementById(sudokuID);
   const itemRows: HTMLCollectionOf<Element> = sudokuContainer?.getElementsByClassName('sudoku-row') as HTMLCollectionOf<Element>;
   const row: HTMLElement = itemRows[rowIndex] as HTMLElement;
@@ -171,7 +171,7 @@ const handleHighlightRow: (sudokuID: string, rowIndex: number, enterExit: enterE
     itemParentRowChild.classList.remove('error');
     if (enterExit === 'enter') {
       itemParentRowChild.classList.add('hover');
-      if (itemValue === currentValue && showErrors) {
+      if (itemValue === currentValue && sudokuShowErrors) {
         itemParentRowChild.classList.add('error');
       }
     } else {
@@ -180,7 +180,7 @@ const handleHighlightRow: (sudokuID: string, rowIndex: number, enterExit: enterE
   }
 };
 
-const isValidPlacement: (grid: Grid, row: number, col: number, num: number) => boolean = (grid, row, col, num) => {
+const isValidSudokuPlacement: (grid: Grid, row: number, col: number, num: number) => boolean = (grid, row, col, num) => {
   for (let i: number = 0; i < 9; i++) {
     if (grid[row][i] === num || grid[i][col] === num) {
       return false;
@@ -198,16 +198,16 @@ const isValidPlacement: (grid: Grid, row: number, col: number, num: number) => b
   return true;
 };
 
-const randomiseSeed: (seed: number) => () => number = (seed) => {
-  let state: number = seed;
+const randomiseSudokuSeed: (sudokuSeed: number) => () => number = (sudokuSeed) => {
+  let state: number = sudokuSeed;
   return () => {
     const x: number = Math.sin(state++) * 10000;
     return x - Math.floor(x);
   };
 };
 
-const removeRandomNumbers: (grid: Grid, seed: number, difficulty: number) => void = (grid, seed, difficulty) => {
-  const rng: () => number = randomiseSeed(seed);
+const removeRandomSudokuNumbers: (grid: Grid, sudokuSeed: number, difficulty: number) => void = (grid, sudokuSeed, difficulty) => {
+  const rng: () => number = randomiseSudokuSeed(sudokuSeed);
   for (let i: number = 0; i < difficulty; i++) {
     let row: number, col: number;
     do {
@@ -218,7 +218,7 @@ const removeRandomNumbers: (grid: Grid, seed: number, difficulty: number) => voi
   }
 };
 
-const shuffleArray: (array: number[]) => number[] = (array) => {
+const shuffleSudokuGrid: (array: number[]) => number[] = (array) => {
   const shuffled: number[] = array.slice();
   for (let i: number = shuffled.length - 1; i > 0; i--) {
     const j: number = Math.floor(Math.random() * (i + 1));
@@ -228,7 +228,7 @@ const shuffleArray: (array: number[]) => number[] = (array) => {
 };
 /* --- end utilities --- */
 
-const clearUserValueInputsActiveState: () => void = () => {
+const clearSudokuUserValueInputsActiveState: () => void = () => {
   const sudokuContainer: HTMLElement | null = document.getElementById(sudokuContainerID);
   if (sudokuContainer === null) {
     return;
@@ -239,7 +239,7 @@ const clearUserValueInputsActiveState: () => void = () => {
   }
 };
 
-const clearHighlighting: () => void = () => {
+const clearSudokuHighlighting: () => void = () => {
   const sudokuContainer: HTMLElement | null = document.getElementById(sudokuContainerID);
   if (sudokuContainer === null) {
     return;
@@ -265,7 +265,7 @@ const getIsValidSudoku: () => boolean = () => {
       const dataValue: string | null = sudokuItems[count].getAttribute('data-value');
       const dataValueNumber: number = dataValue === null ? 0 : parseInt(dataValue);
       if (dataValueNumber === 0 || dataValueNumber !== sudokuGrid[i][j]) {
-        if (showErrors) {
+        if (sudokuShowErrors) {
           sudokuItems[count].classList.add('error');
         }
         sudokuItems[count].classList.add('error');
@@ -277,7 +277,7 @@ const getIsValidSudoku: () => boolean = () => {
   return !hasError;
 };
 
-const handleGridItemMouseEnterExit: (event: Event, enterExit: enterExit) => void = (event, enterExit) => {
+const handleSudokuGridItemMouseEnterExit: (event: Event, enterExit: enterExit) => void = (event, enterExit) => {
   const target: HTMLElement = (event.currentTarget as HTMLElement) || (event.target as HTMLElement);
   const dataValue: string | null = target.getAttribute('data-value');
   const value: number = dataValue === null ? 0 : parseInt(dataValue);
@@ -287,10 +287,10 @@ const handleGridItemMouseEnterExit: (event: Event, enterExit: enterExit) => void
   const itemParentRow: HTMLElement = target.parentElement as HTMLElement;
   const itemColumnIndex: number = Array.prototype.indexOf.call(itemParentRow.children, target);
   const itemRowIndex: number = Array.prototype.indexOf.call(itemParentRow.parentElement?.children, itemParentRow);
-  clearHighlighting();
-  handleHighlightColumn(sudokuContainerID, itemColumnIndex, enterExit, value, showErrors);
-  handleHighlightRow(sudokuContainerID, itemRowIndex, enterExit, value, showErrors);
-  handleHighlightGroup(sudokuContainerID, [itemColumnIndex, itemRowIndex], enterExit, value, showErrors);
+  clearSudokuHighlighting();
+  handleHighlightSudokuColumn(sudokuContainerID, itemColumnIndex, enterExit, value, sudokuShowErrors);
+  handleHighlightSudokuRow(sudokuContainerID, itemRowIndex, enterExit, value, sudokuShowErrors);
+  handleHighlightSudokuGroup(sudokuContainerID, [itemColumnIndex, itemRowIndex], enterExit, value, sudokuShowErrors);
 };
 
 const handleSudokuDifficultyChange: (event: Event) => void = (event) => {
@@ -300,7 +300,7 @@ const handleSudokuDifficultyChange: (event: Event) => void = (event) => {
   sudokuDifficulty = value;
 };
 
-const handleUserInput: (event: Event) => void = (event) => {
+const handleSudokuUserInput: (event: Event) => void = (event) => {
   const target: HTMLElement = (event.currentTarget as HTMLElement) || (event.target as HTMLElement);
   const dataValue: string | null = target.getAttribute('data-value');
   const value: number = dataValue === null ? 0 : parseInt(dataValue);
@@ -308,40 +308,40 @@ const handleUserInput: (event: Event) => void = (event) => {
   const options: HTMLCollectionOf<Element> = target.getElementsByClassName('option') as HTMLCollectionOf<Element>;
   const content: HTMLElement = target.getElementsByClassName('content')[0] as HTMLElement;
   content.classList.remove('active');
-  if (value === activeUserValue) {
+  if (value === sudokuActiveUserValue) {
     target.setAttribute('data-value', '0');
     content.innerHTML = '';
     return;
   } else if (options.length === 0) {
-    optionContainer.innerHTML = `<span class="option _${activeUserValue}" data-value="${activeUserValue}">${activeUserValue}</span>`;
+    optionContainer.innerHTML = `<span class="option _${sudokuActiveUserValue}" data-value="${sudokuActiveUserValue}">${sudokuActiveUserValue}</span>`;
     content.innerHTML = '';
     return;
   }
   for (let i: number = 0; i < options.length; i++) {
     const optionDataValue: string | null = options[i].getAttribute('data-value');
     const optionValue: number = optionDataValue === null ? 0 : parseInt(optionDataValue);
-    if (optionValue === activeUserValue) {
+    if (optionValue === sudokuActiveUserValue) {
       var newHTML: string = '';
       for (let j: number = 0; j < options.length; j++) {
         newHTML += options[i] == options[j] ? '' : options[j].outerHTML;
       }
       optionContainer.innerHTML = newHTML;
-      target.setAttribute('data-value', activeUserValue.toString());
-      content.innerHTML = '<p>' + activeUserValue + '</p>';
+      target.setAttribute('data-value', sudokuActiveUserValue.toString());
+      content.innerHTML = '<p>' + sudokuActiveUserValue + '</p>';
       content.classList.add('active');
       return;
     }
   }
-  optionContainer.innerHTML += `<span class="option ${activeUserValue}" data-value="${activeUserValue}">${activeUserValue}</span>`;
+  optionContainer.innerHTML += `<span class="option ${sudokuActiveUserValue}" data-value="${sudokuActiveUserValue}">${sudokuActiveUserValue}</span>`;
 };
 
 const initialiseSudokuVariables: () => void = () => {
-  seed = Math.floor(Math.random() * 1000);
+  sudokuSeed = Math.floor(Math.random() * 1000);
   sudokuContainerID = 'sudoku';
   sudokuDifficulty = 40;
   sudokuGrid = generateSudokuGrid();
-  sudokuPuzzle = generateSudokuPuzzle(sudokuGrid, seed, sudokuDifficulty);
-  timerOn = false;
+  sudokuPuzzle = generateSudokuPuzzle(sudokuGrid, sudokuSeed, sudokuDifficulty);
+  sudokuTimerOn = false;
 };
 
 const newSudoku: () => void = () => {
@@ -366,8 +366,8 @@ const populateSudokuGrid: (sudoku: Grid) => void = (sudoku) => {
       const dataValue: number = sudoku[a][b] === 0 ? 0 : sudoku[a][b];
       const content: string = sudoku[a][b] === 0 ? '' : `<p>${sudoku[a][b]}</p>`;
       const className: string = sudoku[a][b] === 0 ? 'sudoku-item' : 'sudoku-item set';
-      const functionString: string = sudoku[a][b] === 0 ? 'handleUserInput(event)' : '';
-      sudokuGridHTML += `<div class="${className}" data-value="${dataValue}" onclick="${functionString}" onmouseenter="handleGridItemMouseEnterExit(event, 'enter')" onmouseleave="handleGridItemMouseEnterExit(event, 'exit')"><div class="options"></div><div class="content">${content}</div></div>`;
+      const functionString: string = sudoku[a][b] === 0 ? 'handleSudokuUserInput(event)' : '';
+      sudokuGridHTML += `<div class="${className}" data-value="${dataValue}" onclick="${functionString}" onmouseenter="handleSudokuGridItemMouseEnterExit(event, 'enter')" onmouseleave="handleSudokuGridItemMouseEnterExit(event, 'exit')"><div class="options"></div><div class="content">${content}</div></div>`;
     }
     sudokuGridHTML += '</div>';
   }
@@ -394,7 +394,7 @@ const populateSudokuDifficulty: () => void = () => {
   if (sudokuDifficultyContainer === undefined) {
     return;
   }
-  var sudokuDifficultyHTML: string = getDifficultyAsText(sudokuDifficulty);
+  var sudokuDifficultyHTML: string = getSudokuDifficultyAsText(sudokuDifficulty);
   sudokuDifficultyContainer.innerHTML = sudokuDifficultyHTML;
 };
 
@@ -408,9 +408,9 @@ const restartSudoku: () => void = () => {
 };
 
 const setNewSudokuGrid: () => void = () => {
-  seed = Math.floor(Math.random() * 1000);
+  sudokuSeed = Math.floor(Math.random() * 1000);
   sudokuGrid = generateSudokuGrid();
-  sudokuPuzzle = generateSudokuPuzzle(sudokuGrid, seed, sudokuDifficulty);
+  sudokuPuzzle = generateSudokuPuzzle(sudokuGrid, sudokuSeed, sudokuDifficulty);
   populateSudokuGrid(sudokuPuzzle);
   populateSudokuDifficulty();
   stopSudokuTimer();
@@ -433,18 +433,18 @@ const setSudokuUserValue: (event: Event) => void = (event) => {
   const target: HTMLElement = (event.currentTarget as HTMLElement) || (event.target as HTMLElement);
   const dataValue: string | null = target.getAttribute('data-value');
   const value: number = dataValue === null ? 0 : parseInt(dataValue);
-  clearUserValueInputsActiveState();
+  clearSudokuUserValueInputsActiveState();
   target.classList.add('set');
-  activeUserValue = value;
+  sudokuActiveUserValue = value;
 };
 
-const showCompleteState: () => void = () => {
+const showSudokuCompleteState: () => void = () => {
   const sudokuContainer: HTMLElement = document.getElementById(sudokuContainerID) as HTMLElement;
   sudokuContainer.classList.remove('error');
   sudokuContainer.classList.add('complete');
 };
 
-const showErrorState: () => void = () => {
+const showSudokuErrorState: () => void = () => {
   const sudokuContainer: HTMLElement = document.getElementById(sudokuContainerID) as HTMLElement;
   sudokuContainer.classList.add('error');
   setTimeout(() => {
@@ -468,12 +468,12 @@ const startSudoku: () => void = () => {
 const startSudokuTimer: () => void = () => {
   const sudokuContainer: HTMLElement = document.getElementById(sudokuContainerID) as HTMLElement;
   const sudokuTimer: HTMLElement | null = sudokuContainer.getElementsByClassName('sudoku-timer')[0] as HTMLElement;
-  if (sudokuTimer === null || timerOn) {
+  if (sudokuTimer === null || sudokuTimerOn) {
     return;
   }
   var seconds: number = 0;
   var minutes: number = 0;
-  interval = setInterval(() => {
+  sudokuInterval = setInterval(() => {
     seconds++;
     if (seconds === 60) {
       minutes++;
@@ -481,7 +481,7 @@ const startSudokuTimer: () => void = () => {
     }
     sudokuTimer.innerHTML = `<p>${minutes}:${seconds}</p>`;
   }, 1000);
-  timerOn = true;
+  sudokuTimerOn = true;
 };
 
 const stopSudokuTimer: () => void = () => {
@@ -490,19 +490,19 @@ const stopSudokuTimer: () => void = () => {
   if (sudokuTimer === null) {
     return;
   }
-  clearInterval(interval);
+  clearInterval(sudokuInterval);
   sudokuTimer.innerHTML = '<p>0:0</p>';
-  timerOn = false;
+  sudokuTimerOn = false;
 };
 
 const validateSudoku: () => void = () => {
   setSudokuContainerLoadingState(true);
   const validSudoku: boolean = getIsValidSudoku();
   if (!validSudoku) {
-    showErrorState();
+    showSudokuErrorState();
   } else {
     stopSudokuTimer();
-    showCompleteState();
+    showSudokuCompleteState();
   }
   setSudokuContainerLoadingState(false);
 };
