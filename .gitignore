@@ -2,3 +2,4 @@ bash/aws-push-to-ecr.sh
 node_modules
 dist
 .env.local
+yarn-error.log

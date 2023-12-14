@@ -7,6 +7,7 @@ var sudokuInterval: any = null;
 var sudokuPuzzle: Grid = [];
 var sudokuSeed: number = 0;
 var sudokuGrid: Grid = [];
+var sudokuGameTimer: string = '0.0';
 
 /* --- utilities --- */
 const fillSudoku: (grid: Grid) => boolean = (grid) => {
@@ -387,6 +388,7 @@ const newSudoku: () => void = () => {
   sudokuContainer.classList.remove('complete');
   sudokuContainer.classList.remove('error');
   sudokuContainer.classList.add('ready');
+  sudokuGameTimer = '0.0';
   clearSudokuHighlight();
   stopSudokuTimer();
 };
@@ -441,6 +443,7 @@ const restartSudoku: () => void = () => {
   const sudokuContainer: HTMLElement = document.getElementById(sudokuContainerID) as HTMLElement;
   sudokuContainer.classList.remove('error');
   sudokuContainer.classList.remove('complete');
+  sudokuGameTimer = '0.0';
   clearSudokuHighlight();
   populateSudokuGrid(sudokuPuzzle);
   stopSudokuTimer();
@@ -451,6 +454,7 @@ const setNewSudokuGrid: () => void = () => {
   sudokuSeed = Math.floor(Math.random() * 1000);
   sudokuGrid = generateSudokuGrid();
   sudokuPuzzle = generateSudokuPuzzle(sudokuGrid, sudokuSeed, sudokuDifficulty);
+  sudokuGameTimer = '0.0';
   populateSudokuGrid(sudokuPuzzle);
   populateSudokuDifficulty();
   stopSudokuTimer();
@@ -521,7 +525,8 @@ const startSudokuTimer: () => void = () => {
       minutes++;
       seconds = 0;
     }
-    sudokuTimer.innerHTML = `<p>${minutes}:${seconds}</p>`;
+    sudokuGameTimer = `${minutes}:${seconds}`;
+    sudokuTimer.innerHTML = `<p>${sudokuGameTimer}</p>`;
   }, 1000);
   sudokuTimerOn = true;
 };
@@ -533,7 +538,7 @@ const stopSudokuTimer: () => void = () => {
     return;
   }
   clearInterval(sudokuInterval);
-  sudokuTimer.innerHTML = '<p>0:0</p>';
+  // sudokuTimer.innerHTML = '<p>0:0</p>';
   sudokuTimerOn = false;
 };
 

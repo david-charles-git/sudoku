@@ -178,13 +178,10 @@
 
               &.active {
                 display: grid;
+                background-color: variables.$color-primary;
 
                 &:hover {
                   background-color: variables.$color-primary;
-                }
-
-                + .options {
-                  display: none;
                 }
               }
             }
