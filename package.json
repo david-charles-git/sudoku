@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "description": "Sudoku",
   "main": "./dist/index.html",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/david-charles-git/sudoku.git"
+  },
   "scripts": {
     "start": "yarn build && open ./dist/index.html",
     "build": "bash bash/build.sh",

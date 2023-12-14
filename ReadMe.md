@@ -19,7 +19,7 @@ This project uses the following technologies:
 Once Git is installed, you can clone the repository by running the following command in your terminal:
 
 ```bash
-git clone <repository-url>
+git clone <https://github.com/david-charles-git/sudoku.git>
 ```
 
 Once Node.js and Yarn is installed, you can install the project dependencies by running the following command in your terminal:
