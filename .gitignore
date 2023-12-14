@@ -1,3 +1,2 @@
 node_modules
 dist
-bash/aws-ecr-push.sh
