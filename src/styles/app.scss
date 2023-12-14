@@ -15,6 +15,7 @@
       }
 
       .error-container {
+        display: -ms-grid;
         display: grid;
 
         .background {
@@ -24,6 +25,7 @@
       }
 
       .sudoku-container {
+        display: -ms-grid;
         display: grid;
       }
     }
@@ -39,6 +41,7 @@
       }
 
       .loading-container {
+        display: -ms-grid;
         display: grid;
 
         .background {
@@ -59,30 +62,12 @@
       }
 
       .ready-container {
+        display: -ms-grid;
         display: grid;
 
         .background {
           opacity: 0.5;
           background-color: variables.$color-primary;
-        }
-      }
-
-      .sudoku-controls-buttons,
-      .sudoku-controls-button,
-      .sudoku-values,
-      .sudoku-timer,
-      .sudoku-difficulty-title,
-      .sudoku-grid {
-        display: none;
-      }
-
-      .sudoku-difficulty-container {
-        display: block;
-      }
-
-      .sudoku-controls-button {
-        &.start {
-          display: inline-block;
         }
       }
     }
@@ -97,6 +82,7 @@
       }
 
       .completion-container {
+        display: -ms-grid;
         display: grid;
 
         .background {
@@ -106,7 +92,20 @@
       }
 
       .sudoku-container {
+        display: -ms-grid;
         display: grid;
+      }
+
+      .sudoku-controls-button {
+        &.new {
+          display: inline-block;
+        }
+
+        &.restart,
+        &.menu,
+        &.validate {
+          display: none;
+        }
       }
     }
   }
@@ -121,18 +120,45 @@
       }
 
       .sudoku-container {
+        display: -ms-grid;
         display: grid;
       }
     }
   }
+
+  &.menu {
+    > .inner {
+      .error-container,
+      .completion-container,
+      .loading-container,
+      .ready-container,
+      .sudoku-container {
+        display: none;
+      }
+
+      .menu-container {
+        display: -ms-grid;
+        display: grid;
+
+        .background {
+          opacity: 0.5;
+          background-color: variables.$color-primary;
+        }
+      }
+    }
+  }
+
   > .inner {
     @include mixins.grid;
     grid-gap: variables.$big-grid-gap;
+    -ms-grid-columns: 1fr;
     grid-template-columns: 1fr;
+    -ms-grid-rows: auto variables.$small-grid-gap auto;
     grid-template-rows: auto auto;
     width: clamp(300px, 80vw, 600px);
     margin: 0 auto;
     padding: clamp(variables.$small-grid-gap, 10vw, variables.$big-grid-gap);
+    -webkit-filter: drop-shadow(0px 0px 10px variables.$color-secondary);
     filter: drop-shadow(0px 0px 10px variables.$color-secondary);
     background-color: variables.$color-primary;
     border-radius: 30px;
@@ -143,13 +169,17 @@
     .error-container,
     .completion-container,
     .loading-container,
-    .ready-container {
+    .ready-container,
+    .menu-container {
       @include mixins.grid;
       @include mixins.background;
       display: none;
+      padding: clamp(20px, 10vw, 50px);
 
       .background {
         @include mixins.background;
+        -webkit-transition: background-color 1s ease-in-out;
+        -o-transition: background-color 1s ease-in-out;
         transition: background-color 1s ease-in-out;
         background-color: variables.$color-primary;
       }
@@ -183,6 +213,7 @@
       .sudoku-row {
         @include mixins.grid;
         grid-gap: 0px;
+        -ms-grid-columns: auto 0 auto 0 auto 0 auto 0 auto 0 auto 0 auto 0 auto 0 auto;
         grid-template-columns: repeat(9, auto);
         text-align: center;
 
@@ -208,6 +239,7 @@
             display: none;
 
             &.active {
+              display: -ms-grid;
               display: grid;
               background-color: variables.$color-primary;
 
@@ -220,10 +252,15 @@
           .options {
             @include mixins.grid;
             @include mixins.background;
+            -ms-grid-columns: 1fr 0 1fr 0 1fr;
             grid-template-columns: repeat(3, 1fr);
             grid-gap: 0;
+            -ms-flex-line-pack: stretch;
             align-content: stretch;
+            -webkit-box-align: stretch;
+            -ms-flex-align: stretch;
             align-items: stretch;
+            -ms-grid-rows: auto 0 auto 0 auto;
             grid-template-areas: '1 2 3' '4 5 6' '7 8 9';
 
             .option {
@@ -232,38 +269,47 @@
               text-align: center;
 
               &._1 {
+                -ms-grid-row: 1;
                 grid-area: 1;
               }
 
               &._2 {
+                -ms-grid-row: 2;
                 grid-area: 2;
               }
 
               &._3 {
+                -ms-grid-row: 3;
                 grid-area: 3;
               }
 
               &._4 {
+                -ms-grid-row: 4;
                 grid-area: 4;
               }
 
               &._5 {
+                -ms-grid-row: 5;
                 grid-area: 5;
               }
 
               &._6 {
+                -ms-grid-row: 6;
                 grid-area: 6;
               }
 
               &._7 {
+                -ms-grid-row: 7;
                 grid-area: 7;
               }
 
               &._8 {
+                -ms-grid-row: 8;
                 grid-area: 8;
               }
 
               &._9 {
+                -ms-grid-row: 9;
                 grid-area: 9;
               }
             }
@@ -291,18 +337,13 @@
     .sudoku-values {
       @include mixins.grid;
       grid-gap: 0px;
+      -ms-grid-columns: auto 0px auto 0px auto 0px auto 0px auto 0px auto 0px auto 0px auto 0px auto;
       grid-template-columns: repeat(9, auto);
       text-align: center;
 
       .sudoku-values-item {
         @include mixins.item;
       }
-    }
-
-    .sudoku-controls-buttons {
-      @include mixins.grid;
-      grid-gap: variables.$small-grid-gap;
-      grid-template-columns: repeat(2, 1fr);
     }
 
     .sudoku-controls-button {
@@ -318,13 +359,21 @@
         background-color: variables.$color-tertiary;
       }
 
-      &.start {
+      &.new {
         display: none;
       }
     }
-  }
 
-  p.title {
-    font-size: 3em;
+    .sudoku-title {
+      font-size: 3em;
+    }
+  }
+  > .inner > *:nth-child(1) {
+    -ms-grid-row: 1;
+    -ms-grid-column: 1;
+  }
+  > .inner > *:nth-child(2) {
+    -ms-grid-row: 3;
+    -ms-grid-column: 1;
   }
 }

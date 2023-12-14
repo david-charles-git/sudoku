@@ -1,17 +1,23 @@
 type Grid = number[][];
-type GroupIndex = [number, number];
+type GridIndex = [number, number];
 type enterExit = 'enter' | 'exit';
-type PlayState = 'loading' | 'ready' | 'playing' | 'complete' | 'error';
+type PlayState = 'loading' | 'ready' | 'playing' | 'complete' | 'error' | 'menu';
 type GameState = {
-  playState: PlayState;
+  grid: Grid;
+  puzzle: Grid;
+  seed: number;
+  timer: string;
+  sudokuState: Grid;
+  gameScore: number;
+  errorInterval: any;
+  difficulty: number;
   activeValue: number;
   showErrors: boolean;
   containerID: string;
-  timerOn: boolean;
-  difficulty: number;
-  errorInterval: any;
-  puzzle: Grid;
-  seed: number;
-  grid: Grid;
-  timer: string;
+  playState: PlayState;
+  timeInSeconds: number;
+  validationClicks: number;
+};
+type GameStatePartial = {
+  [key: string]: any;
 };
