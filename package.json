@@ -12,7 +12,7 @@
     "build": "bash bash/build.sh",
     "docker-build": "yarn build && docker build -t sudoku .",
     "docker-run": "docker run -p 8080:80 -d sudoku && open http://localhost:8080",
-    "aws-ecr-push": "bash bash/aws-ecr-push.sh"
+    "aws-push-ecr": "bash bash/aws-push-ecr.sh"
   },
   "author": "David Charles",
   "license": "MIT",
