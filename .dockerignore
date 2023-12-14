@@ -4,7 +4,6 @@ src
 node_modules
 .gitignore
 .git
-.package-lock.json
 package.json
 ReadMe.md
 tsconfig.json
