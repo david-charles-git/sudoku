@@ -1,5 +1,5 @@
 aws_ecr_push () {
-  ecr_id="000000000000"
+  ecr_id="811111"
   ecr_region="eu-west-1"
   ecr_uri="$ecr_id.dkr.ecr.$ecr_region.amazonaws.com"
   image_name="sudoku:latest"
