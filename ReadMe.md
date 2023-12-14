@@ -36,6 +36,25 @@ There are four scripts within the package.json file that can be used to run the 
 - `yarn build` - This will build the project using the build.sh script and output the files to the dist folder.
 - `yarn docker-build` - This will build (`yarn build`) the project and if you have Docker Desktop installed and running, this will build the project image using the Dockerfile.
 - `yarn docker-run` - If you have Docker Desktop installed and running, his will run the project image on your local server at [localhost:8080](http://localhost:8080/).
+- `yarn aws-push-to-ecr` - If you have Docker Desktop installed and running, this will push the project image to your AWS ECR repository. The file has not been include but an exmaple code snippet is below:
+
+```bash
+  # aws-push-to-ecr.sh
+
+  aws_push_to_ecr () {
+    ecr_id="123456789012"
+    ecr_region="eu-west-1"
+    ecr_uri="$ecr_id.dkr.ecr.$ecr_region.amazonaws.com"
+    image_name="sudoku:latest"
+    echo "Logging into AWS ECR"
+    aws ecr get-login-password --region "$ecr_region" | docker login --username AWS --password-stdin "$ecr_uri"
+    echo "Pushing image to AWS ECR"
+    docker tag "$image_name" "$ecr_uri/$image_name"
+    docker push "$ecr_uri/$image_name"
+    echo "Image pushed to AWS ECR"
+  }
+  aws_push_to_ecr
+```
 
 ## Project Structure
 
