@@ -8,29 +8,7 @@ var showErrors: boolean = true;
 var timerOn: boolean = false;
 var interval: any = null;
 
-const clearUserValueInputsActiveState: () => void = () => {
-  const sudokuContainer: HTMLElement | null = document.getElementById(sudokuContainerID);
-  if (sudokuContainer === null) {
-    return;
-  }
-  const sudokuValueItems: HTMLCollectionOf<Element> = sudokuContainer.getElementsByClassName('sudoku-values-item');
-  for (let i: number = 0; i < sudokuValueItems.length; i++) {
-    sudokuValueItems[i].classList.remove('set');
-  }
-};
-
-const clearHighlighting: () => void = () => {
-  const sudokuContainer: HTMLElement | null = document.getElementById(sudokuContainerID);
-  if (sudokuContainer === null) {
-    return;
-  }
-  const sudokuItems: HTMLCollectionOf<Element> = sudokuContainer.getElementsByClassName('sudoku-item');
-  for (let i: number = 0; i < sudokuItems.length; i++) {
-    sudokuItems[i].classList.remove('error');
-    sudokuItems[i].classList.remove('hover');
-  }
-};
-
+/* --- utilities --- */
 const fillSudoku: (grid: Grid) => boolean = (grid) => {
   const emptyCell: GroupIndex | null = findEmptyCell(grid);
   if (!emptyCell) {
@@ -76,9 +54,8 @@ const generateSudokuPuzzle: (grid: Grid, seed: number, difficulty: number) => Gr
   return puzzle;
 };
 
-const getDifficultyAsText: () => string = () => {
-  const difficultyAsPercentage: number = (100 / 80) * sudokuDifficulty;
-  console.log(difficultyAsPercentage);
+const getDifficultyAsText: (difficulty: number) => string = (difficulty) => {
+  const difficultyAsPercentage: number = (100 / 80) * difficulty;
   var sudokuDifficultyHTML: string = '';
   if (difficultyAsPercentage < 25) {
     sudokuDifficultyHTML = '<p>Easy</p>';
@@ -90,32 +67,6 @@ const getDifficultyAsText: () => string = () => {
     sudokuDifficultyHTML = '<p>Extreme</p>';
   }
   return sudokuDifficultyHTML;
-};
-
-const getIsValidSudoku: () => boolean = () => {
-  const sudokuContainer: HTMLElement | null = document.getElementById(sudokuContainerID);
-  const sudokuGridContainer: Element | undefined = sudokuContainer?.getElementsByClassName('sudoku-grid')[0];
-  if (sudokuGridContainer === undefined) {
-    return false;
-  }
-  const sudokuItems: HTMLCollectionOf<Element> = sudokuGridContainer.getElementsByClassName('sudoku-item');
-  var count: number = 0;
-  var hasError: boolean = false;
-  for (let i: number = 0; i < sudokuGrid.length; i++) {
-    for (let j: number = 0; j < sudokuGrid[i].length; j++) {
-      const dataValue: string | null = sudokuItems[count].getAttribute('data-value');
-      const dataValueNumber: number = dataValue === null ? 0 : parseInt(dataValue);
-      if (dataValueNumber === 0 || dataValueNumber !== sudokuGrid[i][j]) {
-        if (showErrors) {
-          sudokuItems[count].classList.add('error');
-        }
-        sudokuItems[count].classList.add('error');
-        hasError = true;
-      }
-      count++;
-    }
-  }
-  return !hasError;
 };
 
 const getItemGroupIndexLimits: (itemIndex: GroupIndex) => [GroupIndex, GroupIndex] = (itemIndex) => {
@@ -144,24 +95,14 @@ const getItemGroupIndexLimits: (itemIndex: GroupIndex) => [GroupIndex, GroupInde
   return [columnLimit, rowLimit];
 };
 
-const handleGridItemMouseEnterExit: (event: Event, enterExit: enterExit) => void = (event, enterExit) => {
-  const target: HTMLElement = (event.currentTarget as HTMLElement) || (event.target as HTMLElement);
-  const dataValue: string | null = target.getAttribute('data-value');
-  const value: number = dataValue === null ? 0 : parseInt(dataValue);
-  if (value === 0) {
-    return;
-  }
-  const itemParentRow: HTMLElement = target.parentElement as HTMLElement;
-  const itemColumnIndex: number = Array.prototype.indexOf.call(itemParentRow.children, target);
-  const itemRowIndex: number = Array.prototype.indexOf.call(itemParentRow.parentElement?.children, itemParentRow);
-  clearHighlighting();
-  handleHighlightColumn(itemColumnIndex, enterExit, value);
-  handleHighlightRow(itemRowIndex, enterExit, value);
-  handleHighlightGroup([itemColumnIndex, itemRowIndex], enterExit, value);
-};
-
-const handleHighlightColumn: (columnIndex: number, enterExit: enterExit, currentValue: number) => void = (columnIndex, enterExit, currentValue) => {
-  const sudokuContainer: HTMLElement | null = document.getElementById(sudokuContainerID);
+const handleHighlightColumn: (sudokuID: string, columnIndex: number, enterExit: enterExit, currentValue: number, showErrors?: boolean) => void = (
+  sudokuID,
+  columnIndex,
+  enterExit,
+  currentValue,
+  showErrors = false
+) => {
+  const sudokuContainer: HTMLElement | null = document.getElementById(sudokuID);
   const itemRows: HTMLCollectionOf<Element> = sudokuContainer?.getElementsByClassName('sudoku-row') as HTMLCollectionOf<Element>;
   for (let i: number = 0; i < itemRows.length; i++) {
     const itemRowChildren: HTMLCollectionOf<Element> = itemRows[i].getElementsByClassName('sudoku-item');
@@ -180,8 +121,14 @@ const handleHighlightColumn: (columnIndex: number, enterExit: enterExit, current
   }
 };
 
-const handleHighlightGroup: (itemIndex: GroupIndex, enterExit: enterExit, currentValue: number) => void = (itemIndex, enterExit, currentValue) => {
-  const sudokuContainer: HTMLElement | null = document.getElementById(sudokuContainerID);
+const handleHighlightGroup: (sudokuID: string, itemIndex: GroupIndex, enterExit: enterExit, currentValue: number, showErrors?: boolean) => void = (
+  sudokuID,
+  itemIndex,
+  enterExit,
+  currentValue,
+  showErrors = false
+) => {
+  const sudokuContainer: HTMLElement | null = document.getElementById(sudokuID);
   const itemRows: HTMLCollectionOf<Element> = sudokuContainer?.getElementsByClassName('sudoku-row') as HTMLCollectionOf<Element>;
   const groupIndexLimits: [GroupIndex, GroupIndex] = getItemGroupIndexLimits(itemIndex);
   for (let i: number = 0; i < itemRows.length; i++) {
@@ -207,8 +154,14 @@ const handleHighlightGroup: (itemIndex: GroupIndex, enterExit: enterExit, curren
   }
 };
 
-const handleHighlightRow: (rowIndex: number, enterExit: enterExit, currentValue: number) => void = (rowIndex, enterExit, currentValue) => {
-  const sudokuContainer: HTMLElement | null = document.getElementById(sudokuContainerID);
+const handleHighlightRow: (sudokuID: string, rowIndex: number, enterExit: enterExit, currentValue: number, showErrors?: boolean) => void = (
+  sudokuID,
+  rowIndex,
+  enterExit,
+  currentValue,
+  showErrors = false
+) => {
+  const sudokuContainer: HTMLElement | null = document.getElementById(sudokuID);
   const itemRows: HTMLCollectionOf<Element> = sudokuContainer?.getElementsByClassName('sudoku-row') as HTMLCollectionOf<Element>;
   const row: HTMLElement = itemRows[rowIndex] as HTMLElement;
   for (let i: number = 0; i < row.children.length; i++) {
@@ -225,6 +178,119 @@ const handleHighlightRow: (rowIndex: number, enterExit: enterExit, currentValue:
       itemParentRowChild.classList.remove('hover');
     }
   }
+};
+
+const isValidPlacement: (grid: Grid, row: number, col: number, num: number) => boolean = (grid, row, col, num) => {
+  for (let i: number = 0; i < 9; i++) {
+    if (grid[row][i] === num || grid[i][col] === num) {
+      return false;
+    }
+  }
+  const subgridRowStart: number = Math.floor(row / 3) * 3;
+  const subgridColStart: number = Math.floor(col / 3) * 3;
+  for (let i: number = 0; i < 3; i++) {
+    for (let j: number = 0; j < 3; j++) {
+      if (grid[subgridRowStart + i][subgridColStart + j] === num) {
+        return false;
+      }
+    }
+  }
+  return true;
+};
+
+const randomiseSeed: (seed: number) => () => number = (seed) => {
+  let state: number = seed;
+  return () => {
+    const x: number = Math.sin(state++) * 10000;
+    return x - Math.floor(x);
+  };
+};
+
+const removeRandomNumbers: (grid: Grid, seed: number, difficulty: number) => void = (grid, seed, difficulty) => {
+  const rng: () => number = randomiseSeed(seed);
+  for (let i: number = 0; i < difficulty; i++) {
+    let row: number, col: number;
+    do {
+      row = Math.floor(rng() * 9);
+      col = Math.floor(rng() * 9);
+    } while (grid[row][col] === 0);
+    grid[row][col] = 0;
+  }
+};
+
+const shuffleArray: (array: number[]) => number[] = (array) => {
+  const shuffled: number[] = array.slice();
+  for (let i: number = shuffled.length - 1; i > 0; i--) {
+    const j: number = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+};
+/* --- end utilities --- */
+
+const clearUserValueInputsActiveState: () => void = () => {
+  const sudokuContainer: HTMLElement | null = document.getElementById(sudokuContainerID);
+  if (sudokuContainer === null) {
+    return;
+  }
+  const sudokuValueItems: HTMLCollectionOf<Element> = sudokuContainer.getElementsByClassName('sudoku-values-item');
+  for (let i: number = 0; i < sudokuValueItems.length; i++) {
+    sudokuValueItems[i].classList.remove('set');
+  }
+};
+
+const clearHighlighting: () => void = () => {
+  const sudokuContainer: HTMLElement | null = document.getElementById(sudokuContainerID);
+  if (sudokuContainer === null) {
+    return;
+  }
+  const sudokuItems: HTMLCollectionOf<Element> = sudokuContainer.getElementsByClassName('sudoku-item');
+  for (let i: number = 0; i < sudokuItems.length; i++) {
+    sudokuItems[i].classList.remove('error');
+    sudokuItems[i].classList.remove('hover');
+  }
+};
+
+const getIsValidSudoku: () => boolean = () => {
+  const sudokuContainer: HTMLElement | null = document.getElementById(sudokuContainerID);
+  const sudokuGridContainer: Element | undefined = sudokuContainer?.getElementsByClassName('sudoku-grid')[0];
+  if (sudokuGridContainer === undefined) {
+    return false;
+  }
+  const sudokuItems: HTMLCollectionOf<Element> = sudokuGridContainer.getElementsByClassName('sudoku-item');
+  var count: number = 0;
+  var hasError: boolean = false;
+  for (let i: number = 0; i < sudokuGrid.length; i++) {
+    for (let j: number = 0; j < sudokuGrid[i].length; j++) {
+      const dataValue: string | null = sudokuItems[count].getAttribute('data-value');
+      const dataValueNumber: number = dataValue === null ? 0 : parseInt(dataValue);
+      if (dataValueNumber === 0 || dataValueNumber !== sudokuGrid[i][j]) {
+        if (showErrors) {
+          sudokuItems[count].classList.add('error');
+        }
+        sudokuItems[count].classList.add('error');
+        hasError = true;
+      }
+      count++;
+    }
+  }
+  return !hasError;
+};
+
+const handleGridItemMouseEnterExit: (event: Event, enterExit: enterExit) => void = (event, enterExit) => {
+  const target: HTMLElement = (event.currentTarget as HTMLElement) || (event.target as HTMLElement);
+  const dataValue: string | null = target.getAttribute('data-value');
+  const value: number = dataValue === null ? 0 : parseInt(dataValue);
+  if (value === 0) {
+    return;
+  }
+  const itemParentRow: HTMLElement = target.parentElement as HTMLElement;
+  const itemColumnIndex: number = Array.prototype.indexOf.call(itemParentRow.children, target);
+  const itemRowIndex: number = Array.prototype.indexOf.call(itemParentRow.parentElement?.children, itemParentRow);
+  clearHighlighting();
+  handleHighlightColumn(sudokuContainerID, itemColumnIndex, enterExit, value, showErrors);
+  handleHighlightRow(sudokuContainerID, itemRowIndex, enterExit, value, showErrors);
+  handleHighlightGroup(sudokuContainerID, [itemColumnIndex, itemRowIndex], enterExit, value, showErrors);
 };
 
 const handleSudokuDifficultyChange: (event: Event) => void = (event) => {
@@ -278,24 +344,6 @@ const initialiseSudokuVariables: () => void = () => {
   timerOn = false;
 };
 
-const isValidPlacement: (grid: Grid, row: number, col: number, num: number) => boolean = (grid, row, col, num) => {
-  for (let i: number = 0; i < 9; i++) {
-    if (grid[row][i] === num || grid[i][col] === num) {
-      return false;
-    }
-  }
-  const subgridRowStart: number = Math.floor(row / 3) * 3;
-  const subgridColStart: number = Math.floor(col / 3) * 3;
-  for (let i: number = 0; i < 3; i++) {
-    for (let j: number = 0; j < 3; j++) {
-      if (grid[subgridRowStart + i][subgridColStart + j] === num) {
-        return false;
-      }
-    }
-  }
-  return true;
-};
-
 const newSudoku: () => void = () => {
   const sudokuContainer: HTMLElement = document.getElementById(sudokuContainerID) as HTMLElement;
   sudokuContainer.classList.add('ready');
@@ -347,28 +395,8 @@ const populateSudokuDifficulty: () => void = () => {
   if (sudokuDifficultyContainer === undefined) {
     return;
   }
-  var sudokuDifficultyHTML: string = getDifficultyAsText();
+  var sudokuDifficultyHTML: string = getDifficultyAsText(sudokuDifficulty);
   sudokuDifficultyContainer.innerHTML = sudokuDifficultyHTML;
-};
-
-const randomiseSeed: (seed: number) => () => number = (seed) => {
-  let state: number = seed;
-  return () => {
-    const x: number = Math.sin(state++) * 10000;
-    return x - Math.floor(x);
-  };
-};
-
-const removeRandomNumbers: (grid: Grid, seed: number, difficulty: number) => void = (grid, seed, difficulty) => {
-  const rng: () => number = randomiseSeed(seed);
-  for (let i: number = 0; i < difficulty; i++) {
-    let row: number, col: number;
-    do {
-      row = Math.floor(rng() * 9);
-      col = Math.floor(rng() * 9);
-    } while (grid[row][col] === 0);
-    grid[row][col] = 0;
-  }
 };
 
 const restartSudoku: () => void = () => {
@@ -410,7 +438,7 @@ const setSudokuUserValue: (event: Event) => void = (event) => {
 
 const showCompleteState: () => void = () => {
   const sudokuContainer: HTMLElement = document.getElementById(sudokuContainerID) as HTMLElement;
-  sudokuContainer.classList.add('complete');
+  sudokuContainer.classList.add('ready');
 };
 
 const showErrorState: () => void = () => {
@@ -419,15 +447,6 @@ const showErrorState: () => void = () => {
   setTimeout(() => {
     sudokuContainer.classList.remove('error');
   }, 3000);
-};
-
-const shuffleArray: (array: number[]) => number[] = (array) => {
-  const shuffled: number[] = array.slice();
-  for (let i: number = shuffled.length - 1; i > 0; i--) {
-    const j: number = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-  }
-  return shuffled;
 };
 
 const solveSudoku: () => void = () => {
@@ -478,6 +497,7 @@ const validateSudoku: () => void = () => {
   if (!validSudoku) {
     showErrorState();
   } else {
+    stopSudokuTimer();
     showCompleteState();
   }
   setSudokuContainerLoadingState(false);

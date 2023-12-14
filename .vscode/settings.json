@@ -3,5 +3,7 @@
     "node_modules": true,
     "dist": true,
   },
-  "cSpell.words": []
+  "cSpell.words": [
+    "subgrid"
+  ]
 }

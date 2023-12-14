@@ -2,6 +2,7 @@ build() {
   echo "Building project..."
   handle_dist_dir_reset
   handle_html
+  handle_misc
   handle_ts
   handle_sass
   echo "Finished building project"
@@ -25,6 +26,23 @@ handle_html() {
     fi
   done
   echo "Copied HTML files to dist directory"
+}
+handle_misc() {
+  misc_source_dir="src"
+  misc_dist_dir="dist"
+  for misc_file in "$misc_source_dir"/*ico; do
+    if [ -f "$misc_file" ]; then
+      file_name=$(basename "$misc_file")
+      cp "$misc_file" "$misc_dist_dir/$file_name"
+    fi
+  done
+  for misc_file in "$misc_source_dir"/*png; do
+    if [ -f "$misc_file" ]; then
+      file_name=$(basename "$misc_file")
+      cp "$misc_file" "$misc_dist_dir/$file_name"
+    fi
+  done
+  echo "Copied misc files to dist directory"
 }
 handle_ts() {
   tsc
