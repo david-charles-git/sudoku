@@ -353,9 +353,6 @@ const newSudoku: () => void = () => {
 };
 
 const populateSudokuGrid: (sudoku: Grid) => void = (sudoku) => {
-  if (!sudoku) {
-    return;
-  }
   const sudokuContainer: HTMLElement | null = document.getElementById(sudokuContainerID);
   const sudokuGridContainer: Element | undefined = sudokuContainer?.getElementsByClassName('sudoku-grid')[0];
   if (sudokuGridContainer === undefined) {
