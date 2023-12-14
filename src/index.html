@@ -5,55 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sudoku</title>
     <link rel="icon" type="./favicon.png" sizes="32x32" href="./assets/favicon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet" />
+    <style>
+      * {
+        margin: 0 auto;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Roboto', sans-serif;
+      }
+    </style>
+
+    <!-- Sudoku stylesheet -->
     <link rel="stylesheet" href="./css/app.min.css" type="text/css" />
   </head>
 
   <body>
     <main id="root">
-      <section id="sudoku" class="loading ready">
-        <div class="inner">
-          <div class="error-container">
-            <div class="background"></div>
-          </div>
-
-          <div class="completion-container">
-            <div class="background"></div>
-          </div>
-
-          <div class="loading-container">
-            <p>Loading</p>
-          </div>
-
-          <div class="sudoku-container">
-            <div class="sudoku-header">
-              <h1>Sudoku</h1>
-              <p class="sudoku-difficulty-title"></p>
-              <div class="sudoku-timer"><p>0:0</p></div>
-            </div>
-
-            <div class="sudoku-grid"></div>
-
-            <div class="sudoku-controls">
-              <div class="sudoku-values"></div>
-
-              <div class="sudoku-difficulty">
-                <p>Difficulty</p>
-                <input type="range" min="1" max="80" value="40" class="slider" id="difficulty" oninput="handleSudokuDifficultyChange(event)" />
-              </div>
-
-              <div class="sudoku-controls-buttons">
-                <button class="sudoku-controls-button start" onclick="startSudoku()">Start</button>
-                <button class="sudoku-controls-button" onclick="newSudoku()">New Game</button>
-                <button class="sudoku-controls-button" onclick="restartSudoku()">Restart Game</button>
-                <button class="sudoku-controls-button" onclick="validateSudoku()">Check</button>
-                <button class="sudoku-controls-button" onclick="solveSudoku()">Solve</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <script src="./js/app.min.js"></script>
-      </section>
+      <!-- Sudoku -->
+      <section id="sudoku"></section>
     </main>
+
+    <!-- Sudoku Script -->
+    <script src="./js/app.min.js"></script>
   </body>
 </html>

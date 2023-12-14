@@ -1,12 +1,6 @@
 @use 'library/mixins' as mixins;
 @use 'library/variables' as variables;
 
-* {
-  margin: 0 auto;
-  padding: 0;
-  box-sizing: border-box;
-}
-
 #sudoku {
   @include mixins.grid;
   text-align: center;
@@ -14,35 +8,42 @@
 
   &.error {
     > .inner {
+      .loading-container,
+      .completion-container,
+      .ready-container {
+        display: none;
+      }
+
       .error-container {
-        @include mixins.grid;
+        display: grid;
 
         .background {
           opacity: 0.5;
           background-color: variables.$color-error;
         }
       }
+
+      .sudoku-container {
+        display: grid;
+      }
     }
   }
 
   &.loading {
     > .inner {
-      .loading-container {
-        @include mixins.grid;
-      }
-
-      .sudoku-container {
+      .error-container,
+      .completion-container,
+      .sudoku-container,
+      .ready-container {
         display: none;
       }
-    }
 
-    &.ready {
-      > .inner {
-        .sudoku-container {
-          .sudoku-grid,
-          .sudoku-controls {
-            display: none;
-          }
+      .loading-container {
+        display: grid;
+
+        .background {
+          opacity: 0.5;
+          background-color: variables.$color-primary;
         }
       }
     }
@@ -50,37 +51,38 @@
 
   &.ready {
     > .inner {
+      .error-container,
+      .completion-container,
+      .loading-container,
       .sudoku-container {
-        .sudoku-header .sudoku-timer,
-        .sudoku-difficulty-title,
-        .sudoku-grid {
-          display: none;
+        display: none;
+      }
+
+      .ready-container {
+        display: grid;
+
+        .background {
+          opacity: 0.5;
+          background-color: variables.$color-primary;
         }
+      }
 
-        .sudoku-controls {
-          .sudoku-values {
-            display: none;
-          }
+      .sudoku-controls-buttons,
+      .sudoku-controls-button,
+      .sudoku-values,
+      .sudoku-timer,
+      .sudoku-difficulty-title,
+      .sudoku-grid {
+        display: none;
+      }
 
-          .sudoku-difficulty {
-            display: block;
-          }
+      .sudoku-difficulty-container {
+        display: block;
+      }
 
-          .sudoku-controls-buttons {
-            grid-template-columns: auto;
-
-            .sudoku-controls-button {
-              display: none;
-
-              &.start {
-                display: inline-block;
-              }
-            }
-          }
-
-          .sudoku-timer {
-            display: none;
-          }
+      .sudoku-controls-button {
+        &.start {
+          display: inline-block;
         }
       }
     }
@@ -88,17 +90,41 @@
 
   &.complete {
     > .inner {
+      .error-container,
+      .loading-container,
+      .ready-container {
+        display: none;
+      }
+
       .completion-container {
-        @include mixins.grid;
+        display: grid;
 
         .background {
           opacity: 0.5;
           background-color: variables.$color-success;
         }
       }
+
+      .sudoku-container {
+        display: grid;
+      }
     }
   }
 
+  &.playing {
+    > .inner {
+      .error-container,
+      .completion-container,
+      .loading-container,
+      .ready-container {
+        display: none;
+      }
+
+      .sudoku-container {
+        display: grid;
+      }
+    }
+  }
   > .inner {
     @include mixins.grid;
     grid-gap: variables.$big-grid-gap;
@@ -112,10 +138,13 @@
     border-radius: 30px;
     max-width: 100vw;
     overflow: hidden;
-    min-height: 80%;
+    min-height: 600px;
 
     .error-container,
-    .completion-container {
+    .completion-container,
+    .loading-container,
+    .ready-container {
+      @include mixins.grid;
       @include mixins.background;
       display: none;
 
@@ -124,177 +153,178 @@
         transition: background-color 1s ease-in-out;
         background-color: variables.$color-primary;
       }
-    }
 
-    .loading-container {
-      display: none;
+      .content {
+        @include mixins.grid;
+        position: relative;
+      }
     }
 
     .sudoku-container {
       @include mixins.grid;
       position: relative;
       z-index: 2;
+    }
 
-      .sudoku-header {
+    .sudoku-header {
+      @include mixins.grid;
+      grid-gap: variables.$small-grid-gap;
+    }
+
+    .sudoku-timer {
+      @include mixins.grid;
+      text-align: center;
+    }
+
+    .sudoku-grid {
+      @include mixins.grid;
+      grid-gap: 0;
+
+      .sudoku-row {
         @include mixins.grid;
-        grid-gap: variables.$small-grid-gap;
+        grid-gap: 0px;
+        grid-template-columns: repeat(9, auto);
+        text-align: center;
 
-        .sudoku-timer {
-          @include mixins.grid;
-          text-align: center;
+        &:nth-child(3n + 1) {
+          .sudoku-item {
+            border-top: variables.$big-border;
+          }
         }
-      }
 
-      .sudoku-grid {
-        @include mixins.grid;
-        grid-gap: 0;
+        &:last-child {
+          .sudoku-item {
+            border-bottom: variables.$big-border;
+          }
+        }
 
-        .sudoku-row {
-          @include mixins.grid;
-          grid-gap: 0px;
-          grid-template-columns: repeat(9, auto);
-          text-align: center;
+        .sudoku-item {
+          @include mixins.item;
+
+          .content {
+            @include mixins.grid;
+            @include mixins.background;
+            z-index: 1;
+            display: none;
+
+            &.active {
+              display: grid;
+              background-color: variables.$color-primary;
+
+              &:hover {
+                background-color: variables.$color-primary;
+              }
+            }
+          }
+
+          .options {
+            @include mixins.grid;
+            @include mixins.background;
+            grid-template-columns: repeat(3, 1fr);
+            grid-gap: 0;
+            align-content: stretch;
+            align-items: stretch;
+            grid-template-areas: '1 2 3' '4 5 6' '7 8 9';
+
+            .option {
+              font-size: 10px;
+              height: 100%;
+              text-align: center;
+
+              &._1 {
+                grid-area: 1;
+              }
+
+              &._2 {
+                grid-area: 2;
+              }
+
+              &._3 {
+                grid-area: 3;
+              }
+
+              &._4 {
+                grid-area: 4;
+              }
+
+              &._5 {
+                grid-area: 5;
+              }
+
+              &._6 {
+                grid-area: 6;
+              }
+
+              &._7 {
+                grid-area: 7;
+              }
+
+              &._8 {
+                grid-area: 8;
+              }
+
+              &._9 {
+                grid-area: 9;
+              }
+            }
+          }
+
+          &:nth-child(1) {
+            border-left: variables.$big-border;
+          }
 
           &:nth-child(3n + 1) {
-            .sudoku-item {
-              border-top: variables.$big-border;
-            }
+            border-left: variables.$big-border;
           }
 
           &:last-child {
-            .sudoku-item {
-              border-bottom: variables.$big-border;
-            }
-          }
-
-          .sudoku-item {
-            @include mixins.item;
-
-            .content {
-              @include mixins.grid;
-              @include mixins.background;
-              z-index: 1;
-              display: none;
-
-              &.active {
-                display: grid;
-                background-color: variables.$color-primary;
-
-                &:hover {
-                  background-color: variables.$color-primary;
-                }
-              }
-            }
-
-            .options {
-              @include mixins.grid;
-              @include mixins.background;
-              grid-template-columns: repeat(3, 1fr);
-              grid-gap: 0;
-              align-content: stretch;
-              align-items: stretch;
-              grid-template-areas: '1 2 3' '4 5 6' '7 8 9';
-
-              .option {
-                font-size: 10px;
-                height: 100%;
-                text-align: center;
-
-                &._1 {
-                  grid-area: 1;
-                }
-
-                &._2 {
-                  grid-area: 2;
-                }
-
-                &._3 {
-                  grid-area: 3;
-                }
-
-                &._4 {
-                  grid-area: 4;
-                }
-
-                &._5 {
-                  grid-area: 5;
-                }
-
-                &._6 {
-                  grid-area: 6;
-                }
-
-                &._7 {
-                  grid-area: 7;
-                }
-
-                &._8 {
-                  grid-area: 8;
-                }
-
-                &._9 {
-                  grid-area: 9;
-                }
-              }
-            }
-
-            &:nth-child(1) {
-              border-left: variables.$big-border;
-            }
-
-            &:nth-child(3n + 1) {
-              border-left: variables.$big-border;
-            }
-
-            &:last-child {
-              border-right: variables.$big-border;
-            }
-          }
-        }
-      }
-
-      .sudoku-controls {
-        @include mixins.grid;
-
-        .sudoku-values {
-          @include mixins.grid;
-          grid-gap: 0px;
-          grid-template-columns: repeat(9, auto);
-          text-align: center;
-
-          .sudoku-values-item {
-            @include mixins.item;
-          }
-        }
-
-        .sudoku-difficulty {
-          display: none;
-        }
-
-        .sudoku-controls-buttons {
-          @include mixins.grid;
-          grid-gap: variables.$small-grid-gap;
-          grid-template-columns: repeat(2, 1fr);
-
-          .sudoku-controls-button {
-            display: inline-block;
-            cursor: pointer;
-            background: none;
-            border: none;
-            border: variables.$small-border;
-            outline: unset;
-            padding: 0.5em 1em;
-
-            &:hover {
-              background-color: variables.$color-tertiary;
-            }
-
-            &.start {
-              display: none;
-            }
+            border-right: variables.$big-border;
           }
         }
       }
     }
+
+    .sudoku-controls {
+      @include mixins.grid;
+    }
+
+    .sudoku-values {
+      @include mixins.grid;
+      grid-gap: 0px;
+      grid-template-columns: repeat(9, auto);
+      text-align: center;
+
+      .sudoku-values-item {
+        @include mixins.item;
+      }
+    }
+
+    .sudoku-controls-buttons {
+      @include mixins.grid;
+      grid-gap: variables.$small-grid-gap;
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .sudoku-controls-button {
+      display: inline-block;
+      cursor: pointer;
+      background: none;
+      border: none;
+      border: variables.$small-border;
+      outline: unset;
+      padding: 0.5em 1em;
+
+      &:hover {
+        background-color: variables.$color-tertiary;
+      }
+
+      &.start {
+        display: none;
+      }
+    }
+  }
+
+  p.title {
+    font-size: 3em;
   }
 }
