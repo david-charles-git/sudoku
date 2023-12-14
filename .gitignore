@@ -1,3 +1,4 @@
+bash/aws-ecr-push.sh
 node_modules
 dist
-bash/aws-ecr-push.sh
+.env.local
