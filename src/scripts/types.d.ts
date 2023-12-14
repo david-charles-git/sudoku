@@ -17,6 +17,7 @@ type GameState = {
   playState: PlayState;
   timeInSeconds: number;
   validationClicks: number;
+  gridSize: number;
 };
 type GameStatePartial = {
   [key: string]: any;

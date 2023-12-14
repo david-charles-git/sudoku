@@ -33,6 +33,7 @@ var sudokuGameState: GameState = {
   playState: 'loading',
   containerID: 'sudoku',
   seed: Math.floor(Math.random() * 1000),
+  gridSize: 3,
 };
 const getSudokuGameState: () => GameState = () => {
   return sudokuGameState;
@@ -48,7 +49,7 @@ const fillSudoku: (grid: Grid) => boolean = (grid) => {
     return true;
   }
   const [row, col]: GridIndex = emptyCell;
-  const numbers: number[] = shuffleSudokuGrid([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+  const numbers: number[] = shuffleSudokuGrid(getSudokuBaseGrid());
   for (const num of numbers) {
     if (isValidSudokuPlacement(grid, row, col, num)) {
       grid[row][col] = num;
@@ -82,6 +83,15 @@ const generateSudokuPuzzle: (grid: Grid, sudokuSeed: number, difficulty: number)
   }
   removeRandomSudokuNumbers(puzzle, sudokuSeed, difficulty);
   return puzzle;
+};
+const getSudokuBaseGrid: () => number[] = () => {
+  if (sudokuGameState.gridSize < 2) {
+    return [1, 2, 3, 4];
+  } else if (sudokuGameState.gridSize === 3) {
+    return [1, 2, 3, 4, 5, 6, 7, 8, 9];
+  } else {
+    return [1, 2, 3, 4, 5, 6, 7, 8, 9];
+  }
 };
 const getSudokuItemGroupIndexLimits: (itemIndex: GridIndex) => [GridIndex, GridIndex] = (itemIndex) => {
   const columnLimit: GridIndex = [0, 3];
@@ -182,6 +192,7 @@ const initialiseSudokuVariables: () => void = () => {
     grid: generateSudoku(),
     gameScore: 0,
     validationClicks: 0,
+    gridSize: 3,
   });
   updateSudokuGameState({ puzzle: generateSudokuPuzzle(sudokuGameState.grid, sudokuGameState.seed, sudokuGameState.difficulty) });
   updateSudokuGameState({ sudokuState: sudokuGameState.puzzle });
@@ -245,7 +256,7 @@ const populateSudokuContainer: () => void = () => {
             class="slider sudoku-difficulty-input"
             oninput="handleSudokuDifficultyChange(event)" />
         </div>
-        <button class="sudoku-controls-button start" onclick="goToPlayScreen()">Start</button>
+        <button class="sudoku-controls-button start" onclick="startNewSudoku()">Start</button>
       </div>
     </div>
 
@@ -461,15 +472,6 @@ const getSudokuState: () => Grid = () => {
 const goToLandingScreen: () => void = () => {
   setSudokuPlayState('loading');
   stopSudokuTimer();
-  updateSudokuGameState({
-    seed: Math.floor(Math.random() * 1000),
-    grid: generateSudoku(),
-    timer: '0:0',
-    timeInSeconds: 0,
-    validationClicks: 0,
-  });
-  updateSudokuGameState({ puzzle: generateSudokuPuzzle(sudokuGameState.grid, sudokuGameState.seed, sudokuGameState.difficulty) });
-  updateSudokuGameState({ sudokuState: sudokuGameState.puzzle });
   populateSudokuGame();
   setSudokuPlayState('ready');
 };
@@ -621,6 +623,21 @@ const validateCurrentSudoku: () => void = () => {
     sudokuGameStateRecord.push(sudokuGameState);
     setSudokuPlayState('complete');
   }
+};
+const startNewSudoku: () => void = () => {
+  setSudokuPlayState('loading');
+  stopSudokuTimer();
+  updateSudokuGameState({
+    seed: Math.floor(Math.random() * 1000),
+    grid: generateSudoku(),
+    timer: '0:0',
+    timeInSeconds: 0,
+    validationClicks: 0,
+  });
+  updateSudokuGameState({ puzzle: generateSudokuPuzzle(sudokuGameState.grid, sudokuGameState.seed, sudokuGameState.difficulty) });
+  updateSudokuGameState({ sudokuState: sudokuGameState.puzzle });
+  populateSudokuGame();
+  goToPlayScreen();
 };
 
 const setSudokuActiveValue: (event: Event) => void = (event) => {
