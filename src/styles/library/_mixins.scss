@@ -20,10 +20,20 @@
   padding: 5px;
   border: variables.$small-border;
   cursor: pointer;
-  display: inline-block;
-  box-sizing: border-box;
   background-color: variables.$color-primary;
   position: relative;
+
+  &.error {
+    p {
+      color: variables.$color-error;
+    }
+
+    &:hover {
+      p {
+        color: variables.$color-secondary;
+      }
+    }
+  }
 
   &:hover,
   &.hover {
@@ -46,20 +56,19 @@
     }
   }
 
-  &.error {
+  &.highlight {
     p {
-      color: variables.$color-error;
+      color: variables.$color-success;
     }
 
     &:hover {
       p {
-        color: variables.$color-secondary;
+        color: variables.$color-success;
       }
     }
   }
 
   p {
-    margin: 0 auto;
     color: variables.$color-secondary;
     user-select: none;
   }

@@ -134,7 +134,7 @@ const handleHighlightSudokuGroup: (
   for (let i: number = 0; i < itemRows.length; i++) {
     const itemRowChildren: HTMLCollectionOf<Element> = itemRows[i].getElementsByClassName('sudoku-item');
     if (i > groupIndexLimits[1][0] && i < groupIndexLimits[1][1]) {
-      for (let j: number = 0; j < itemRows.length; j++) {
+      for (let j: number = 0; j < itemRowChildren.length; j++) {
         if (j > groupIndexLimits[0][0] && j < groupIndexLimits[0][1]) {
           const itemRowChild: HTMLElement = itemRowChildren[j] as HTMLElement;
           const itemDataValue: string | null = itemRowChild.getAttribute('data-value');
@@ -176,6 +176,23 @@ const handleHighlightSudokuRow: (
       }
     } else {
       itemParentRowChild.classList.remove('hover');
+    }
+  }
+};
+
+const handleHighlightAllSudokuItemsByIndex: (sudokuID: string, itemIndex: number) => void = (sudokuID, itemIndex) => {
+  const sudokuContainer: HTMLElement | null = document.getElementById(sudokuID);
+  const itemRows: HTMLCollectionOf<Element> = sudokuContainer?.getElementsByClassName('sudoku-row') as HTMLCollectionOf<Element>;
+  for (let i: number = 0; i < itemRows.length; i++) {
+    const itemRowChildren: HTMLCollectionOf<Element> = itemRows[i].getElementsByClassName('sudoku-item');
+    for (let j: number = 0; j < itemRowChildren.length; j++) {
+      const itemRowChild: HTMLElement = itemRowChildren[j] as HTMLElement;
+      const itemDataValue: string | null = itemRowChild.getAttribute('data-value');
+      const itemValue: number = itemDataValue === null ? 0 : parseInt(itemDataValue);
+      itemRowChild.classList.remove('highlight');
+      if (itemValue === itemIndex && itemRowChild.classList.contains('set')) {
+        itemRowChild.classList.add('highlight');
+      }
     }
   }
 };
@@ -239,7 +256,18 @@ const clearSudokuUserValueInputsActiveState: () => void = () => {
   }
 };
 
-const clearSudokuHighlighting: () => void = () => {
+const clearSudokuHighlight: () => void = () => {
+  const sudokuContainer: HTMLElement | null = document.getElementById(sudokuContainerID);
+  if (sudokuContainer === null) {
+    return;
+  }
+  const sudokuItems: HTMLCollectionOf<Element> = sudokuContainer.getElementsByClassName('sudoku-item');
+  for (let i: number = 0; i < sudokuItems.length; i++) {
+    sudokuItems[i].classList.remove('highlight');
+  }
+};
+
+const clearSudokuHover: () => void = () => {
   const sudokuContainer: HTMLElement | null = document.getElementById(sudokuContainerID);
   if (sudokuContainer === null) {
     return;
@@ -287,10 +315,20 @@ const handleSudokuGridItemMouseEnterExit: (event: Event, enterExit: enterExit) =
   const itemParentRow: HTMLElement = target.parentElement as HTMLElement;
   const itemColumnIndex: number = Array.prototype.indexOf.call(itemParentRow.children, target);
   const itemRowIndex: number = Array.prototype.indexOf.call(itemParentRow.parentElement?.children, itemParentRow);
-  clearSudokuHighlighting();
+  clearSudokuHover();
   handleHighlightSudokuColumn(sudokuContainerID, itemColumnIndex, enterExit, value, sudokuShowErrors);
   handleHighlightSudokuRow(sudokuContainerID, itemRowIndex, enterExit, value, sudokuShowErrors);
   handleHighlightSudokuGroup(sudokuContainerID, [itemColumnIndex, itemRowIndex], enterExit, value, sudokuShowErrors);
+};
+
+const handleSudokuGridSetItemOnClick: (event: Event) => void = (event) => {
+  const target: HTMLElement = (event.currentTarget as HTMLElement) || (event.target as HTMLElement);
+  const dataValue: string | null = target.getAttribute('data-value');
+  const value: number = dataValue === null ? 0 : parseInt(dataValue);
+  if (value === 0) {
+    return;
+  }
+  handleHighlightAllSudokuItemsByIndex(sudokuContainerID, value);
 };
 
 const handleSudokuDifficultyChange: (event: Event) => void = (event) => {
@@ -349,6 +387,7 @@ const newSudoku: () => void = () => {
   sudokuContainer.classList.remove('complete');
   sudokuContainer.classList.remove('error');
   sudokuContainer.classList.add('ready');
+  clearSudokuHighlight();
   stopSudokuTimer();
 };
 
@@ -366,7 +405,7 @@ const populateSudokuGrid: (sudoku: Grid) => void = (sudoku) => {
       const dataValue: number = sudoku[a][b] === 0 ? 0 : sudoku[a][b];
       const content: string = sudoku[a][b] === 0 ? '' : `<p>${sudoku[a][b]}</p>`;
       const className: string = sudoku[a][b] === 0 ? 'sudoku-item' : 'sudoku-item set';
-      const functionString: string = sudoku[a][b] === 0 ? 'handleSudokuUserInput(event)' : '';
+      const functionString: string = sudoku[a][b] === 0 ? 'handleSudokuUserInput(event)' : 'handleSudokuGridSetItemOnClick(event)';
       sudokuGridHTML += `<div class="${className}" data-value="${dataValue}" onclick="${functionString}" onmouseenter="handleSudokuGridItemMouseEnterExit(event, 'enter')" onmouseleave="handleSudokuGridItemMouseEnterExit(event, 'exit')"><div class="options"></div><div class="content">${content}</div></div>`;
     }
     sudokuGridHTML += '</div>';
@@ -402,6 +441,7 @@ const restartSudoku: () => void = () => {
   const sudokuContainer: HTMLElement = document.getElementById(sudokuContainerID) as HTMLElement;
   sudokuContainer.classList.remove('error');
   sudokuContainer.classList.remove('complete');
+  clearSudokuHighlight();
   populateSudokuGrid(sudokuPuzzle);
   stopSudokuTimer();
   startSudokuTimer();
@@ -453,6 +493,7 @@ const showSudokuErrorState: () => void = () => {
 };
 
 const solveSudoku: () => void = () => {
+  clearSudokuHighlight();
   populateSudokuGrid(sudokuGrid);
   stopSudokuTimer();
 };
@@ -461,6 +502,7 @@ const startSudoku: () => void = () => {
   const sudokuContainer: HTMLElement = document.getElementById(sudokuContainerID) as HTMLElement;
   sudokuContainer.classList.remove('error');
   sudokuContainer.classList.remove('ready');
+  clearSudokuHighlight();
   setNewSudokuGrid();
   startSudokuTimer();
 };
@@ -498,6 +540,7 @@ const stopSudokuTimer: () => void = () => {
 const validateSudoku: () => void = () => {
   setSudokuContainerLoadingState(true);
   const validSudoku: boolean = getIsValidSudoku();
+  clearSudokuHighlight();
   if (!validSudoku) {
     showSudokuErrorState();
   } else {
