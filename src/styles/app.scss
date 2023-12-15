@@ -9,7 +9,7 @@
   &.ready {
     > .inner {
       .error-container,
-      .completion-container,
+      .complete-container,
       .loading-container,
       .sudoku-container {
         display: none;
@@ -43,7 +43,7 @@
   &.playing {
     > .inner {
       .error-container,
-      .completion-container,
+      .complete-container,
       .loading-container,
       .ready-container {
         display: none;
@@ -59,7 +59,7 @@
   &.menu {
     > .inner {
       .error-container,
-      .completion-container,
+      .complete-container,
       .loading-container,
       .ready-container,
       .sudoku-container {
@@ -81,7 +81,7 @@
   &.error {
     > .inner {
       .loading-container,
-      .completion-container,
+      .complete-container,
       .ready-container {
         display: none;
       }
@@ -111,7 +111,7 @@
         display: none;
       }
 
-      .completion-container {
+      .complete-container {
         display: -ms-grid;
         display: grid;
 
@@ -142,7 +142,7 @@
   &.loading {
     > .inner {
       .error-container,
-      .completion-container,
+      .complete-container,
       .sudoku-container,
       .ready-container {
         display: none;
@@ -164,7 +164,7 @@
     @include mixins.inner;
 
     .error-container,
-    .completion-container,
+    .complete-container,
     .loading-container,
     .ready-container,
     .menu-container {

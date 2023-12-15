@@ -15,6 +15,7 @@ handle_dist_reset() {
   mkdir "$dist_dir"
   echo "Dist directory reset"
 }
+
 handle_webapp_migration_to_dist() {
   misc_source_dir="src"
   misc_dist_dir="dist"
@@ -25,9 +26,20 @@ handle_webapp_migration_to_dist() {
   cp "$misc_source_dir/index.html" "$misc_dist_dir/index.html"
   echo "Webapp app files migrated from src to dist"
 }
+
 handle_ts_compilation_minification_migration_to_dist() {
   tsc
+  app_file="app.js"
+  touch "$app_file"
   js_source_dir="dist/js"
+  for js_file in "$js_source_dir"/*.js; do
+      if [ -e "$js_file" ]; then
+        cat "$js_file" >> "$app_file"
+        echo -e "\n" >> "$app_file"
+        rm "$js_file"
+      fi
+  done
+  mv "$app_file" "$js_source_dir/$app_file"
   for js_file in "$js_source_dir"/*.js; do
     if [ -f "$js_file" ]; then
       file_name="${js_file##*/}"
@@ -38,6 +50,7 @@ handle_ts_compilation_minification_migration_to_dist() {
   done
   echo "Compiled TypeScript to JavaScript and minified"
 }
+
 handle_sass_compilation_minification_migration_to_dist() {
   scss_source_dir="src/styles"
   css_source_dir="dist/css"
