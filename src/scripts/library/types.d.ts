@@ -7,6 +7,8 @@ type GameState = {
   puzzle: Grid;
   seed: number;
   timer: string;
+  gridSize: number;
+  timerOn: boolean;
   sudokuState: Grid;
   gameScore: number;
   errorInterval: any;
@@ -16,8 +18,8 @@ type GameState = {
   containerID: string;
   playState: PlayState;
   timeInSeconds: number;
+  difficultyMax: number;
   validationClicks: number;
-  gridSize: number;
 };
 type GameStatePartial = {
   [key: string]: any;
